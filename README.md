@@ -17,13 +17,13 @@ To clone and run this application, From your command line:
 $ git clone https://github.com/xD-saleem/web-assembly-go
 
 # Go into the repository
-$ cd electron-markdownify
+$ cd web-assembly-go
 
 # Build wasm
 $ make build
 
-# Start Server
-$ make Start
+# Start Server or just run the server by navigating to cmd/server
+$ make Start 
 
-# go to localhost:8000 and open console
+# go to localhost:8000 and open console and see how gourtine can be used in the web.
 ```
