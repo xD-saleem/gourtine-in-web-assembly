@@ -1,41 +1,48 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"syscall/js"
 )
 
-func jsonWrapper() js.Func {
+func count() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
-		if len(args) != 1 {
-			return "Invalid no of arguments passed"
+		var totalCount = 0
+		for i := 0; i < 500; i++ {
+			fmt.Println(i)
+			totalCount++
 		}
-		inputJSON := args[0].String()
-		fmt.Printf("input %s\n", inputJSON)
-		pretty, err := prettyJson(inputJSON)
-		if err != nil {
-			fmt.Printf("unable to convert to json %s\n", err)
-			return err.Error()
-		}
-		return pretty
+		fmt.Printf("toal count %d\n", totalCount)
+		return totalCount
 	})
 }
 
-func prettyJson(input string) (string, error) {
-	var raw any
-	if err := json.Unmarshal([]byte(input), &raw); err != nil {
-		return "", err
+func write(ch chan int, number *int) {
+
+	for i := 0; i < 10; i++ {
+		ch <- i
+		*number++
+		fmt.Println("successfully wrote", i, "to ch")
 	}
-	pretty, err := json.MarshalIndent(raw, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(pretty), nil
+	close(ch)
+}
+
+func process() js.Func {
+	number := 0
+
+	return js.FuncOf(func(this js.Value, args []js.Value) any {
+		// creates capacity of 2
+		ch := make(chan int, 1)
+		go write(ch, &number)
+		for v := range ch {
+			fmt.Println("reading this", v, "to ch")
+		}
+		return number
+	})
 }
 
 func main() {
-	fmt.Println("web Go Web Assembly")
-	js.Global().Set("formatJSON", jsonWrapper())
+	fmt.Println("Web Assembly")
+	js.Global().Set("process", process())
 	<-make(chan bool)
 }
